@@ -1,0 +1,6 @@
+{
+  "kdf": "PBKDF2-SHA256",
+  "iterations": 600000,
+  "salt": "vWxl2dFnm2CuTkQ9bry7Hg==",
+  "deck": "vault/deck.bin"
+}
