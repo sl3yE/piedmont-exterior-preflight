@@ -65,6 +65,34 @@ $('theme-toggle').addEventListener('click', () => {
   try { localStorage.setItem('preflight-theme-v1', theme); } catch { /* Works for this visit. */ }
 });
 
+// Fullscreen for the whole app. iPhone Safari has no element fullscreen, and an installed
+// home-screen app already fills the screen, so the button stays hidden there.
+const fullscreenButton = $('fullscreen');
+const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+const canFullscreen = (document.fullscreenEnabled || document.webkitFullscreenEnabled)
+  && !matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches && !navigator.standalone;
+function updateFullscreenButton() {
+  const on = !!fullscreenElement();
+  $('fullscreen-text').textContent = on ? 'Exit fullscreen' : 'Fullscreen';
+  $('fullscreen-icon').setAttribute('d', on ? 'M5.5 1.5v4h-4M14.5 5.5h-4v-4M10.5 14.5v-4h4M1.5 10.5h4v4' : 'M1.5 5.5v-4h4M10.5 1.5h4v4M14.5 10.5v4h-4M5.5 14.5h-4v-4');
+  fullscreenButton.title = `${on ? 'Exit fullscreen' : 'Fullscreen'} (F)`;
+  fullscreenButton.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Fullscreen');
+}
+function toggleFullscreen() {
+  const root = document.documentElement;
+  const request = fullscreenElement()
+    ? (document.exitFullscreen || document.webkitExitFullscreen).call(document)
+    : (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+  Promise.resolve(request).catch(() => { status.textContent = 'Fullscreen is not available in this browser.'; });
+}
+if (canFullscreen) {
+  fullscreenButton.hidden = false;
+  fullscreenButton.addEventListener('click', toggleFullscreen);
+  document.addEventListener('fullscreenchange', updateFullscreenButton);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+  updateFullscreenButton();
+}
+
 function scopeSlides() {
   if (!itemsOnly) return slides;
   return shuffled || slides.filter(slide => slide.preflightItem);
@@ -450,6 +478,7 @@ document.addEventListener('keydown', event => {
   if (event.ctrlKey || event.metaKey || event.altKey) return;
   if (event.key.toLowerCase() === 'h' && parts.length) { event.preventDefault(); toggleHints(); }
   if (event.key.toLowerCase() === 'l' && parts.length) { event.preventDefault(); toggleLabels(); }
+  if (event.key.toLowerCase() === 'f' && canFullscreen) { event.preventDefault(); toggleFullscreen(); }
   if (event.key === 'ArrowRight') { event.preventDefault(); moveSlide(1); }
   if (event.key === 'ArrowLeft') { event.preventDefault(); moveSlide(-1); }
 });

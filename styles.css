@@ -105,6 +105,8 @@ body { height: 100dvh; display: flex; flex-direction: column; }
 .theme-toggle:hover, .shuffle:not([aria-disabled=true]):hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.6); }
 .header-actions button:focus-visible, .header-actions select:focus-visible { outline-color: #fff; }
 .shuffle span { font-size: 15px; line-height: 1; }
+.fullscreen-toggle[hidden] { display: none; }
+.fullscreen-toggle svg { flex: 0 0 auto; }
 .shuffle[aria-disabled=true], .shuffle[aria-disabled=true]:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.55); border-color: rgba(255,255,255,.22); cursor: not-allowed; }
 .shuffle[aria-pressed=true] { background: #fff; color: #00467e; border-color: #fff; }
 .shuffle[aria-pressed=true]:hover { background: #e6eef5; color: #00467e; }
@@ -297,6 +299,8 @@ footer { flex: 0 0 auto; display: flex; justify-content: space-between; flex-wra
   .segmented label { flex: 1; }
   .segmented span { flex: 1; justify-content: center; text-align: center; padding: 4px 6px; font-size: 11px; }
   .theme-toggle { margin-left: auto; }
+  .fullscreen-toggle:not([hidden]) + .theme-toggle { margin-left: 0; }
+  #fullscreen-text { display: none; }
   .prototype { display: none; }
   main { padding: 8px 12px; gap: 6px; }
   .practice-main { gap: 6px; }
