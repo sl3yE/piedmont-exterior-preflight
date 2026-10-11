@@ -50,6 +50,9 @@
           <article id="reference-content" class="reference-content" hidden></article>
           <div id="reference-transcript" class="sr-only" hidden></div>
           <div id="load-error" class="error" hidden>Could not load this slide. Please reload the page.</div>
+          <button id="enlarge" class="enlarge-button" type="button" aria-keyshortcuts="Z" title="Enlarge photo (Z or double-tap)" hidden><svg aria-hidden="true" viewBox="0 0 16 16" width="13" height="13"><path d="M9.5 1.5h5v5M14.5 1.5l-5 5M6.5 14.5h-5v-5M1.5 14.5l5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Enlarge</button>
+          <div id="enlarge-bar" class="enlarge-bar" hidden><div class="enlarge-nav"><button id="enlarge-prev" type="button" aria-label="Previous slide">‹</button><span id="enlarge-position"></span><button id="enlarge-next" type="button" aria-label="Next slide">›</button></div><div class="enlarge-tools"><button id="enlarge-hints" type="button" aria-pressed="false">Click areas</button><button id="enlarge-labels" type="button" aria-pressed="false">Labels</button><button id="enlarge-close" type="button" aria-label="Close enlarged photo" title="Close (Esc)">✕</button></div></div>
+          <p class="enlarge-hint">Turn your phone sideways for a bigger photo.</p>
           <div id="empty-review" class="empty-review" hidden><span class="empty-icon" aria-hidden="true">✓</span><h2>No slides marked Study more</h2><p>Switch to All slides and mark any slide you want to revisit.</p><button id="browse-slides" class="reset" type="button">Show all slides</button></div>
         </div>
         <aside class="study-bar" aria-label="Slide study controls">
@@ -59,7 +62,7 @@
       </div>
       <div class="below-photo"><p id="status" role="status" aria-live="polite">Loading slides…</p><span class="one-at-time">Labels stay visible</span></div>
       <div id="mobile-labels" class="mobile-labels" hidden></div>
-      <footer><span>Original training photos and inspection checks.</span><span class="shortcuts">Keys: <kbd>←</kbd> <kbd>→</kbd> slides · <kbd>H</kbd> click areas · <kbd>L</kbd> labels · <kbd>F</kbd> fullscreen · <kbd>Esc</kbd> hide labels</span><span class="footer-status"><span id="offline-status" role="status" hidden></span><span id="save-note">Study marks saved in this browser.</span></span></footer>
+      <footer><span>Original training photos and inspection checks.</span><span class="shortcuts">Keys: <kbd>←</kbd> <kbd>→</kbd> slides · <kbd>H</kbd> click areas · <kbd>L</kbd> labels · <kbd>F</kbd> fullscreen · <kbd>Z</kbd> enlarge photo · <kbd>Esc</kbd> hide labels</span><span class="footer-status"><span id="offline-status" role="status" hidden></span><span id="save-note">Study marks saved in this browser.</span></span></footer>
     </section>
   </main>
   <dialog id="notes-dialog" aria-labelledby="notes-title"><div class="dialog-heading"><h2 id="notes-title">Slide notes</h2><button id="close-notes" type="button" aria-label="Close slide notes">✕</button></div><div id="notes-content"></div></dialog>

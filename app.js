@@ -470,6 +470,11 @@ $('reset').addEventListener('click', () => {
 });
 document.addEventListener('keydown', event => {
   if (notesDialog.open) return;
+  if (isEnlarged() && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    const key = event.key.toLowerCase();
+    if (key === 'escape' || key === 'z') { event.preventDefault(); setEnlarged(false); return; }
+    if (key === 'arrowright' || key === 'arrowleft') { event.preventDefault(); moveSlide(key === 'arrowright' ? 1 : -1); return; }
+  }
   if (event.key === 'Escape') {
     saveLabelsPreference(false);
     clearLabels(parts.length ? 'All labels hidden. Click a part to reveal its inspection check.' : null);
@@ -479,6 +484,7 @@ document.addEventListener('keydown', event => {
   if (event.key.toLowerCase() === 'h' && parts.length) { event.preventDefault(); toggleHints(); }
   if (event.key.toLowerCase() === 'l' && parts.length) { event.preventDefault(); toggleLabels(); }
   if (event.key.toLowerCase() === 'f' && canFullscreen) { event.preventDefault(); toggleFullscreen(); }
+  if (event.key.toLowerCase() === 'z' && !stage.hidden) { event.preventDefault(); setEnlarged(true); }
   if (event.key === 'ArrowRight') { event.preventDefault(); moveSlide(1); }
   if (event.key === 'ArrowLeft') { event.preventDefault(); moveSlide(-1); }
 });
@@ -645,6 +651,74 @@ function showEmptyReview() {
   status.textContent = 'No matching slides are marked Study more. Exit review to add one.';
   updateControls();
 }
+// Enlarged photo. The real slide frame is restyled to fill the screen rather than copied,
+// so revealing parts, click areas and labels behave exactly as on the page.
+const photoFrame = $('photo-frame');
+const enlargeButton = $('enlarge');
+let enlargedFullscreen = false;
+const isEnlarged = () => photoFrame.classList.contains('enlarged');
+function syncEnlargeControls() {
+  enlargeButton.hidden = isEnlarged() || stage.hidden;
+  $('enlarge-position').textContent = $('slide-position').textContent;
+  $('enlarge-prev').disabled = $('previous-slide').disabled;
+  $('enlarge-next').disabled = $('next-slide').disabled;
+  for (const [proxy, source] of [[$('enlarge-hints'), hintButton], [$('enlarge-labels'), hideButton]]) {
+    proxy.hidden = source.hidden;
+    proxy.disabled = source.disabled;
+    proxy.setAttribute('aria-pressed', source.getAttribute('aria-pressed') || 'false');
+  }
+}
+new MutationObserver(syncEnlargeControls).observe($('photo-toolbar'), {subtree: true, childList: true, characterData: true, attributes: true});
+new MutationObserver(syncEnlargeControls).observe(stage, {attributes: true, attributeFilter: ['hidden']});
+function setEnlarged(open) {
+  if (open === isEnlarged() || (open && stage.hidden)) return;
+  photoFrame.classList.toggle('enlarged', open);
+  document.documentElement.classList.toggle('enlarge-open', open);
+  $('enlarge-bar').hidden = !open;
+  photoFrame.setAttribute('role', open ? 'dialog' : 'presentation');
+  if (open) photoFrame.setAttribute('aria-label', 'Enlarged photo'); else photoFrame.removeAttribute('aria-label');
+  syncEnlargeControls();
+  if (open) {
+    $('enlarge-close').focus();
+    // Hide browser bars too where element fullscreen exists; iPhone Safari keeps the in-page overlay.
+    const request = !fullscreenElement() && (photoFrame.requestFullscreen || photoFrame.webkitRequestFullscreen);
+    if (request) {
+      enlargedFullscreen = true;
+      Promise.resolve(request.call(photoFrame)).catch(() => { enlargedFullscreen = false; });
+    }
+  } else {
+    if (enlargedFullscreen && fullscreenElement() === photoFrame) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    enlargedFullscreen = false;
+    enlargeButton.focus();
+  }
+}
+function onEnlargeFullscreenChange() {
+  // Leaving browser fullscreen (Esc or a system gesture) also closes the enlarged view.
+  if (enlargedFullscreen && fullscreenElement() !== photoFrame && isEnlarged()) {
+    enlargedFullscreen = false;
+    setEnlarged(false);
+  }
+}
+document.addEventListener('fullscreenchange', onEnlargeFullscreenChange);
+document.addEventListener('webkitfullscreenchange', onEnlargeFullscreenChange);
+enlargeButton.addEventListener('click', () => setEnlarged(true));
+$('enlarge-close').addEventListener('click', () => setEnlarged(false));
+$('enlarge-prev').addEventListener('click', () => moveSlide(-1));
+$('enlarge-next').addEventListener('click', () => moveSlide(1));
+$('enlarge-hints').addEventListener('click', () => toggleHints());
+$('enlarge-labels').addEventListener('click', toggleLabels);
+let lastTap = null;
+$('interaction').addEventListener('pointerup', event => {
+  // Double-click or double-tap on the photo, away from any part, opens or closes the enlarged view.
+  if (event.target.closest('.region')) { lastTap = null; return; }
+  const tap = {time: event.timeStamp, x: event.clientX, y: event.clientY};
+  if (lastTap && tap.time - lastTap.time < 350 && Math.hypot(tap.x - lastTap.x, tap.y - lastTap.y) < 30) {
+    lastTap = null;
+    setEnlarged(!isEnlarged());
+  } else lastTap = tap;
+});
+syncEnlargeControls();
+
 function startDeck() {
   try {
     if (!Array.isArray(deck?.slides)) throw new Error('Slide list unavailable');
